@@ -88,9 +88,10 @@ function dataChannelSetup(
     dataChannel: RTCDataChannel | null;
     id: string | null;
   } | null>,
-  receivedBuffersRef: React.MutableRefObject<Uint8Array[] | undefined>,
-  remoteFileName: string,
-  setRemoteFileName: React.Dispatch<React.SetStateAction<string>>
+  receivedChunkRef: React.MutableRefObject<{
+    buffer: Uint8Array[];
+    remoteFileName: string;
+  }>
 ) {
   const { current } = connectionRef;
 
@@ -109,16 +110,17 @@ function dataChannelSetup(
           const msg = JSON.parse(event.data);
           if (msg.type === "metadata") {
             // Save incoming file metadata and reset buffers.
-            setRemoteFileName(msg.fileName);
-            receivedBuffersRef.current = [];
-            console.log("Received metadata:", msg);
+            receivedChunkRef.current.remoteFileName = msg.fileName;
+            receivedChunkRef.current.buffer = [];
+            console.log("webRTC: Received metadata");
+            console.log(msg);
           } else if (msg.type === "EOF") {
             // Reassemble received chunks into a Blob and trigger download.
-            const blob = new Blob(receivedBuffersRef.current);
+            const blob = new Blob(receivedChunkRef.current.buffer);
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = remoteFileName;
+            a.download = receivedChunkRef.current.remoteFileName;
             document.body.appendChild(a);
             a.click();
             URL.revokeObjectURL(url);
@@ -129,8 +131,8 @@ function dataChannelSetup(
         }
       } else {
         // Otherwise, assume binary data (a Uint8Array chunk) and store it.
-        if (receivedBuffersRef.current) {
-          receivedBuffersRef.current.push(event.data);
+        if (receivedChunkRef.current.buffer) {
+          receivedChunkRef.current.buffer.push(event.data);
         }
       }
     };
@@ -145,7 +147,10 @@ export default function ClientSelector() {
     id: string | null;
   } | null>(null);
 
-  const receivedBuffersRef = useRef<Uint8Array[]>([]);
+  const receivedChunkRef = useRef<{
+    buffer: Uint8Array[];
+    remoteFileName: string;
+  }>({ buffer: [], remoteFileName: "file_download" });
 
   const [selectedClient, setSelectedClient] = useState<{
     key: string;
@@ -156,7 +161,7 @@ export default function ClientSelector() {
 
   const [selectedFile, setSelectedFile] = useState<File>();
 
-  const [remoteFileName, setRemoteFileName] = useState<string>("file_download");
+  // const [remoteFileName, setRemoteFileName] = useState<string>("file_download");
 
   const sendIceCandidateToPeer = (candidate: RTCIceCandidate, toId: string) => {
     const current = connectionRef.current;
@@ -184,7 +189,10 @@ export default function ClientSelector() {
   useEffect(() => {
     if (connectionRef.current) return;
 
-    const webSocket = new WebSocket("ws://192.168.100.106:5173/ws");
+    const webSocket = new WebSocket(
+      `${window.location.origin.replace(/^http/, "ws")}/ws`
+    );
+
     connectionRef.current = {
       webSocket,
       peerConnection: null,
@@ -196,9 +204,10 @@ export default function ClientSelector() {
       const msgData = messageEvent.data;
       if (typeof msgData !== "string") return;
 
-      console.log(`received message: \n ${msgData}`);
-
       const message = JSON.parse(msgData);
+      console.log(`webSocket: Received message`);
+      console.log(message);
+
       switch (message.type) {
         case "availableClient":
           if (isClientUpdateMessage(message)) {
@@ -233,13 +242,7 @@ export default function ClientSelector() {
             peerConnection.ondatachannel = (event) => {
               const dataChannel = event.channel;
 
-              dataChannelSetup(
-                dataChannel,
-                connectionRef,
-                receivedBuffersRef,
-                remoteFileName,
-                setRemoteFileName
-              );
+              dataChannelSetup(dataChannel, connectionRef, receivedChunkRef);
             };
 
             peerConnection.addEventListener("icecandidate", (event) => {
@@ -324,17 +327,13 @@ export default function ClientSelector() {
     const peerConnection = new RTCPeerConnection(configuration);
     current.peerConnection = peerConnection;
 
-    const dataChannel = peerConnection.createDataChannel("data");
+    const dataChannel = peerConnection.createDataChannel("data", {
+      ordered: true,
+    });
 
     //setup data channel
 
-    dataChannelSetup(
-      dataChannel,
-      connectionRef,
-      receivedBuffersRef,
-      remoteFileName,
-      setRemoteFileName
-    );
+    dataChannelSetup(dataChannel, connectionRef, receivedChunkRef);
 
     peerConnection.addEventListener("icecandidate", (event) => {
       if (event.candidate) {
