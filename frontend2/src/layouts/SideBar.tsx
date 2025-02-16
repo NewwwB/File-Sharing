@@ -104,7 +104,7 @@ const SideBar = () => {
   }
 
   return (
-    <Box flex={1} p={2} display="flex" flexDirection="column">
+    <Box p={2} display="flex" flexDirection="column">
       {/* Connection Section */}
       <Connection
         connectionStatus={connectionStatus}

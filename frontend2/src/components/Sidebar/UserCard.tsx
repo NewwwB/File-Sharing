@@ -23,6 +23,7 @@ const UserCard: React.FC<UserCardProps> = ({ name, status }) => {
           alignItems: "center",
           padding: 2,
           borderRadius: 2,
+          flexShrink: 0,
         }}
       >
         <Badge

@@ -10,9 +10,14 @@ import NavBar from "./layouts/NavBar";
 function App() {
   return (
     <>
-      <Box>
+      <Box sx={{ height: "100vh", overflow: "hidden" }}>
         <NavBar />
-        <Stack direction="row" spacing={2} justifyContent="space-between">
+        <Stack
+          direction="row"
+          spacing={2}
+          justifyContent="space-between"
+          height="calc(100vh - 64px)"
+        >
           <SideBar />
           <Content />
         </Stack>
