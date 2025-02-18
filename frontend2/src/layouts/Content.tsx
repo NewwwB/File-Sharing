@@ -1,5 +1,4 @@
 import FileTransferGrid from "../components/Main Content/FileTransferGrid";
-import FileDropzone from "../components/Main Content/FileDropZone";
 import { useState } from "react";
 import { Box, Typography, Button, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -23,7 +22,6 @@ function Content() {
       <Box
         flex={1}
         p={2}
-        bgcolor="skyblue"
         sx={{
           display: "flex",
           flexDirection: "column",
@@ -34,19 +32,6 @@ function Content() {
         }}
       >
         <FileTransferGrid />
-        <FileDropzone />
-        {/* Section 1: Connection Status */}
-        <Box
-          width="60%"
-          bgcolor="white"
-          p={3}
-          borderRadius={2}
-          boxShadow={3}
-          textAlign="center"
-        >
-          <Typography variant="h6">Connection Section</Typography>
-          <Typography color="gray">Status: Connected</Typography>
-        </Box>
 
         {/* Section 2: File Drag & Select with Preview */}
         <Box
