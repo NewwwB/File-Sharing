@@ -1,19 +1,20 @@
 import { useState } from "react";
-import { Box, Typography, Button, IconButton } from "@mui/material";
+import { Box, Typography, Button, List, ListItem, ListItemText, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 function Content() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
 
+  // Handle file selection
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
+    if (event.target.files) {
+      setFiles([...files, ...Array.from(event.target.files)]);
     }
   };
 
-  const handleRemoveFile = () => {
-    setSelectedFile(null);
+  // Remove a file from the list
+  const removeFile = (index: number) => {
+    setFiles(files.filter((_, i) => i !== index));
   };
 
   return (
@@ -27,7 +28,7 @@ function Content() {
         alignItems: "center",
         justifyContent: "center",
         gap: 4,
-        height: "calc(100vh - 64px)", // Adjust for navbar height
+        height: "calc(100vh - 64px)", 
       }}
     >
       {/* Section 1: Connection Status */}
@@ -36,7 +37,7 @@ function Content() {
         <Typography color="gray">Status: Connected</Typography>
       </Box>
 
-      {/* Section 2: File Drag & Select with Preview */}
+      {/* Section 2: File Drag & Select */}
       <Box
         width="60%"
         height="200px"
@@ -50,30 +51,39 @@ function Content() {
         justifyContent="center"
         border="2px dashed gray"
       >
-        {selectedFile ? (
-          <Box display="flex" flexDirection="column" alignItems="center" gap={1}>
-            <Typography variant="body1">{selectedFile.name}</Typography>
-            <Typography variant="body2" color="gray">
-              {(selectedFile.size / 1024).toFixed(2)} KB
-            </Typography>
-            <IconButton color="error" onClick={handleRemoveFile}>
-              <DeleteIcon />
-            </IconButton>
-          </Box>
-        ) : (
-          <Typography>
-            Drag & Drop files here or{" "}
-            <label htmlFor="fileInput" style={{ color: "blue", cursor: "pointer" }}>
-              click to upload
-            </label>
-          </Typography>
+        <Typography>
+          Drag & Drop files here or{" "}
+          <label htmlFor="fileInput" style={{ color: "blue", cursor: "pointer" }}>
+            click to upload
+          </label>
+        </Typography>
+        <input
+          type="file"
+          id="fileInput"
+          style={{ display: "none" }}
+          multiple
+          onChange={handleFileChange}
+        />
+
+        {/* File List Display */}
+        {files.length > 0 && (
+          <List sx={{ width: "100%", maxHeight: "100px", overflowY: "auto", mt: 2 }}>
+            {files.map((file, index) => (
+              <ListItem key={index} secondaryAction={
+                <IconButton edge="end" onClick={() => removeFile(index)}>
+                  <DeleteIcon />
+                </IconButton>
+              }>
+                <ListItemText primary={file.name} secondary={`${(file.size / 1024).toFixed(2)} KB`} />
+              </ListItem>
+            ))}
+          </List>
         )}
-        <input type="file" id="fileInput" style={{ display: "none" }} onChange={handleFileChange} />
       </Box>
 
       {/* Section 3: Send Button */}
-      <Button variant="contained" color="primary" sx={{ width: "60%", py: 1.5 }} disabled={!selectedFile}>
-        {selectedFile ? "Send File" : "Select a File First"}
+      <Button variant="contained" color="primary" sx={{ width: "60%", py: 1.5 }} disabled={files.length === 0}>
+        Send
       </Button>
     </Box>
   );
