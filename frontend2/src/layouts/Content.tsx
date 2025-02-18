@@ -71,7 +71,7 @@ function Content() {
             {files.map((file, index) => (
               <ListItem key={index} secondaryAction={
                 <IconButton edge="end" onClick={() => removeFile(index)}>
-                  <DeleteIcon />
+                  <DeleteIcon sx={{color:"red"}}/>
                 </IconButton>
               }>
                 <ListItemText primary={file.name} secondary={`${(file.size / 1024).toFixed(2)} KB`} />
