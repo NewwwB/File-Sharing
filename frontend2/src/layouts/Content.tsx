@@ -12,8 +12,8 @@ function Content() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
-          gap: 4,
+          justifyContent: "space-between",
+          gap: 1,
           height: "calc(100vh - 64px)", // Adjust for navbar height
         }}
       >

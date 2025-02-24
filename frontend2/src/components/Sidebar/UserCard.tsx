@@ -18,7 +18,7 @@ const UserCard: React.FC<UserCardProps> = ({ name, status }) => {
     <>
       <Card
         sx={{
-          width: 250,
+          // width: 250,
           display: "flex",
           alignItems: "center",
           padding: 2,

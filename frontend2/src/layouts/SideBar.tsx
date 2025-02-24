@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Divider, Box, Typography, Stack } from "@mui/material";
 import UserCard from "../components/Sidebar/UserCard";
 import Connection from "../components/Sidebar/Connection";
+import { PeerConnection } from "../components/Sidebar/PeerConnection";
 
 interface People {
   id: number;
@@ -103,12 +104,62 @@ const SideBar = () => {
     }, 2000);
   }
 
+  const [connected, setConnected] = useState(false);
+  const [peerName, setPeerName] = useState("");
+  const [peerProfilePic, setPeerProfilePic] = useState("");
+  const [incomingRequest, setIncomingRequest] = useState<{
+    requesterId: string;
+    requesterName?: string;
+    requesterProfilePic?: string;
+  } | null>(null);
+
+  const handleConnect = (peerId: string) => {
+    console.log("Sending connection request to:", peerId);
+    // Here, you would send the connection request to the specified peer.
+    // For demonstration, let's simulate an incoming request on the peer's end:
+    setTimeout(() => {
+      // On the receiving end, you might call setIncomingRequest with the requester's info.
+      setIncomingRequest({
+        requesterId: "user-1234",
+        requesterName: "Alice",
+        requesterProfilePic: "https://via.placeholder.com/150",
+      });
+    }, 500);
+  };
+
+  const handleApprove = () => {
+    console.log("Incoming connection approved.");
+    // Accept the incoming request and establish connection
+    setConnected(true);
+    setPeerName(incomingRequest?.requesterName || "Unknown Peer");
+    setPeerProfilePic(incomingRequest?.requesterProfilePic || "");
+    // Clear the incoming request
+    setIncomingRequest(null);
+  };
+
+  const handleReject = () => {
+    console.log("Incoming connection rejected.");
+    // Reject the incoming request
+    setIncomingRequest(null);
+  };
+
   return (
-    <Box p={2} display="flex" flexDirection="column">
+    <Box p={2} display="flex" flexDirection="column" sx={{ width: "400px" }}>
       {/* Connection Section */}
-      <Connection
+      {/* <Connection
         connectionStatus={connectionStatus}
         handleClick={handleClick}
+      /> */}
+
+      <PeerConnection
+        userId="user-63kpzktfr"
+        onConnect={handleConnect}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        isConnected={connected}
+        peerName={peerName}
+        peerProfilePic={peerProfilePic}
+        incomingRequest={incomingRequest || undefined}
       />
 
       <Divider />
