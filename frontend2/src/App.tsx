@@ -6,10 +6,11 @@ import { Box, Stack } from "@mui/material";
 import Content from "./layouts/Content";
 import SideBar from "./layouts/SideBar";
 import NavBar from "./layouts/NavBar";
+import ThemeProviderWrapper from "../src/theme/ThemeProviderWrapper"; // Import theme provider
 
 function App() {
   return (
-    <>
+    <ThemeProviderWrapper>
       <Box sx={{ height: "100vh", overflow: "hidden" }}>
         <NavBar />
         <Stack
@@ -22,7 +23,7 @@ function App() {
           <Content />
         </Stack>
       </Box>
-    </>
+    </ThemeProviderWrapper>
   );
 }
 

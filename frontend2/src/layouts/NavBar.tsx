@@ -12,16 +12,18 @@ import {
   Switch,
 } from "@mui/material";
 import { Menu as MenuIcon } from "@mui/icons-material";
-import React from "react";
+import React, { useContext } from "react";
 import img from "../assets/react.svg";
+import { ThemeContext } from "../theme/ThemeProviderWrapper"; // Import your ThemeContext
 
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
 function NavBar() {
-  // const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
     null
   );
+
+  const { darkMode, toggleDarkMode } = useContext(ThemeContext); // Get dark mode state & function
 
   function handleOpenUserMenu(
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -50,7 +52,14 @@ function NavBar() {
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               File Share
             </Typography>
-            <Switch color="warning" sx={{ marginRight: "10px" }} />
+            
+            {/* Dark Mode Toggle Switch */}
+            <Switch
+              color="warning"
+              checked={darkMode}
+              onChange={toggleDarkMode}
+              sx={{ marginRight: "10px" }}
+            />
             <Typography mr={2}>John</Typography>
             <Box sx={{ flexGrow: 0 }}>
               <Tooltip title="Open settings">
