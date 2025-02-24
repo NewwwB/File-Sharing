@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
 import FileDropzone from "../components/Main Content/FileDropZone";
 import FileTransferGrid from "../components/Main Content/FileTransferGrid";
+import { useState } from "react";
 
 function Content() {
   const [files, setFiles] = useState<File[]>([]);

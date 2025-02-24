@@ -17,20 +17,29 @@ const FileDropzone: React.FC = () => {
   };
 
   return (
-    <>
-      {/* Section 2: File Drag & Select with Preview */}
+    <Box
+      m={0}
+      sx={{
+        width: "100%",
+        textAlign: "center",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      {/* File Drop Zone */}
       <Box
-        width="60%"
-        height="200px"
+        flex="1"
         bgcolor="white"
-        p={3}
+        p={2}
         borderRadius={2}
         boxShadow={3}
         display="flex"
         flexDirection="column"
         alignItems="center"
-        justifyContent="center"
+        justifyContent="space-around"
         border="2px dashed gray"
+        minHeight="150px"
       >
         {selectedFile ? (
           <Box
@@ -46,6 +55,14 @@ const FileDropzone: React.FC = () => {
             <IconButton color="error" onClick={handleRemoveFile}>
               <DeleteIcon />
             </IconButton>
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ mt: 2 }}
+              onClick={() => alert("File Sent!")}
+            >
+              Send File
+            </Button>
           </Box>
         ) : (
           <Typography>
@@ -65,17 +82,7 @@ const FileDropzone: React.FC = () => {
           onChange={handleFileChange}
         />
       </Box>
-
-      {/* Section 3: Send Button */}
-      <Button
-        variant="contained"
-        color="primary"
-        sx={{ width: "60%", py: 1.5 }}
-        disabled={!selectedFile}
-      >
-        {selectedFile ? "Send File" : "Select a File First"}
-      </Button>
-    </>
+    </Box>
   );
 };
 
