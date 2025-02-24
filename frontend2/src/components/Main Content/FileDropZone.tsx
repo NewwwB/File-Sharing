@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { Box, Typography, Button, IconButton } from "@mui/material";
+import { Box, Typography, Button, IconButton, useTheme } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 const FileDropzone: React.FC = () => {
+  const theme = useTheme(); // Get the theme
+  const isDarkMode = theme.palette.mode === "dark"; // Check if dark mode is enabled
+
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -51,7 +54,6 @@ const FileDropzone: React.FC = () => {
     >
       <Box
         flex="1"
-        bgcolor="white"
         p={2}
         borderRadius={2}
         boxShadow={3}
@@ -66,7 +68,14 @@ const FileDropzone: React.FC = () => {
         onDrop={handleDrop}
         sx={{
           borderColor: isDragging ? "blue" : "gray",
-          backgroundColor: isDragging ? "#f0f8ff" : "white",
+          backgroundColor: isDragging
+            ? isDarkMode
+              ? "#333"
+              : "#f0f8ff"
+            : isDarkMode
+            ? "#222"
+            : "white",
+          color: isDarkMode ? "#fff" : "#000",
           transition: "0.2s ease-in-out",
           width: "400px",
         }}
@@ -75,10 +84,13 @@ const FileDropzone: React.FC = () => {
           <Box display="flex" flexDirection="column" gap={1} alignItems="center">
             {selectedFiles.map((file, index) => (
               <Box key={index} display="flex" alignItems="center" gap={2}>
-                
                 {/* File Preview */}
                 {file.type.startsWith("image/") ? (
-                  <img src={previewUrls[index]} alt="Preview" style={{ width: "60px", height: "60px", borderRadius: "8px", objectFit: "cover" }} />
+                  <img
+                    src={previewUrls[index]}
+                    alt="Preview"
+                    style={{ width: "60px", height: "60px", borderRadius: "8px", objectFit: "cover" }}
+                  />
                 ) : (
                   <Typography variant="body2">{file.name}</Typography>
                 )}

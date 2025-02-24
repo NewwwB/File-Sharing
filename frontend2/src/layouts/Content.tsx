@@ -4,19 +4,11 @@ import FileTransferGrid from "../components/Main Content/FileTransferGrid";
 import { useState } from "react";
 
 function Content() {
-  const [files, setFiles] = useState<File[]>([]);
+  const [] = useState<File[]>([]);
 
   // Handle file selection
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      setFiles([...files, ...Array.from(event.target.files)]);
-    }
-  };
 
   // Remove a file from the list
-  const removeFile = (index: number) => {
-    setFiles(files.filter((_, i) => i !== index));
-  };
 
   return (
     <>
