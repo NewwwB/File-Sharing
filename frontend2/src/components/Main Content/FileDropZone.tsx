@@ -1,5 +1,16 @@
 import { useState } from "react";
-import { Box, Typography, Button, IconButton, useTheme } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  IconButton,
+  useTheme,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 const FileDropzone: React.FC = () => {
@@ -16,7 +27,10 @@ const FileDropzone: React.FC = () => {
     );
 
     setSelectedFiles((prev) => [...prev, ...newFiles]);
-    setPreviewUrls((prev) => [...prev, ...newFiles.map((file) => URL.createObjectURL(file))]);
+    setPreviewUrls((prev) => [
+      ...prev,
+      ...newFiles.map((file) => URL.createObjectURL(file)),
+    ]);
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,19 +64,23 @@ const FileDropzone: React.FC = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        flex: "1",
+        overflow: "hidden",
       }}
     >
       <Box
-        flex="1"
         p={2}
         borderRadius={2}
         boxShadow={3}
         display="flex"
+        gap={1}
         flexDirection="column"
+        justifyContent="center"
         alignItems="center"
-        justifyContent="space-around"
         border="2px dashed gray"
         minHeight="150px"
+        height="100%"
+        width="100%"
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -77,44 +95,89 @@ const FileDropzone: React.FC = () => {
             : "white",
           color: isDarkMode ? "#fff" : "#000",
           transition: "0.2s ease-in-out",
-          width: "400px",
         }}
       >
         {selectedFiles.length > 0 ? (
-          <Box display="flex" flexDirection="column" gap={1} alignItems="center">
-            {selectedFiles.map((file, index) => (
-              <Box key={index} display="flex" alignItems="center" gap={2}>
-                {/* File Preview */}
-                {file.type.startsWith("image/") ? (
-                  <img
-                    src={previewUrls[index]}
-                    alt="Preview"
-                    style={{ width: "60px", height: "60px", borderRadius: "8px", objectFit: "cover" }}
-                  />
-                ) : (
-                  <Typography variant="body2">{file.name}</Typography>
-                )}
-                <Typography variant="body2" color="gray">
-                  {(file.size / 1024).toFixed(2)} KB
-                </Typography>
-                <IconButton color="error" onClick={() => handleRemoveFile(index)}>
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            ))}
-            <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={() => alert("Files Sent!")}>
+          <Box
+            display="flex"
+            flexDirection="row"
+            justifyContent="space-around"
+            alignItems="center"
+            width="100%"
+            height="100%"
+          >
+            <Box
+              width="100%"
+              height="100%"
+              sx={{ overflowY: "auto", marginRight: "8rem" }}
+            >
+              <TableContainer sx={{ height: "100%" }}>
+                <Table>
+                  <TableBody>
+                    {selectedFiles.map((file, index) => (
+                      <TableRow key={index}>
+                        <TableCell sx={{ py: 0.5 }}>
+                          {file.type.startsWith("image/") ? (
+                            <img
+                              src={previewUrls[index]}
+                              alt="Preview"
+                              style={{
+                                width: "60px",
+                                height: "60px",
+                                borderRadius: "8px",
+                                objectFit: "cover",
+                              }}
+                            />
+                          ) : (
+                            <Typography variant="body2">{file.name}</Typography>
+                          )}
+                        </TableCell>
+                        <TableCell sx={{ py: 0.5 }}>
+                          <Typography variant="body2" color="gray">
+                            {(file.size / 1024).toFixed(2)} KB
+                          </Typography>
+                        </TableCell>
+                        <TableCell sx={{ py: 0.5 }}>
+                          <IconButton
+                            color="error"
+                            onClick={() => handleRemoveFile(index)}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ maxHeight: "70px" }}
+              onClick={() => alert("Files Sent!")}
+            >
               Send Files
             </Button>
           </Box>
         ) : (
           <Typography>
             Drag & Drop files here or{" "}
-            <label htmlFor="fileInput" style={{ color: "blue", cursor: "pointer" }}>
+            <label
+              htmlFor="fileInput"
+              style={{ color: "blue", cursor: "pointer" }}
+            >
               click to upload
             </label>
           </Typography>
         )}
-        <input type="file" id="fileInput" multiple style={{ display: "none" }} onChange={handleFileChange} />
+        <input
+          type="file"
+          id="fileInput"
+          multiple
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
       </Box>
     </Box>
   );

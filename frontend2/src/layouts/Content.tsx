@@ -19,7 +19,8 @@ function Content() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
+          // justifyContent: "center",
+          overflow: "hidden",
           gap: 4,
           height: "calc(100vh - 64px)", // Adjust for navbar height
         }}

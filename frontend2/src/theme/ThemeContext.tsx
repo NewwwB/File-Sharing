@@ -9,7 +9,9 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export const ThemeProviderWrapper: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const ThemeProviderWrapper: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [darkMode, setDarkMode] = useState(false);
 
   const toggleDarkMode = () => setDarkMode((prev) => !prev);
@@ -32,6 +34,7 @@ export const ThemeProviderWrapper: React.FC<{ children: ReactNode }> = ({ childr
 
 export const useThemeContext = () => {
   const context = useContext(ThemeContext);
-  if (!context) throw new Error("useThemeContext must be used within ThemeProviderWrapper");
+  if (!context)
+    throw new Error("useThemeContext must be used within ThemeProviderWrapper");
   return context;
 };
