@@ -106,11 +106,7 @@ const FileDropzone: React.FC = () => {
             width="100%"
             height="100%"
           >
-            <Box
-              width="100%"
-              height="100%"
-              sx={{ overflowY: "auto", marginRight: "8rem" }}
-            >
+            <Box width="100%" height="100%" sx={{ overflowY: "auto", flex: 6 }}>
               <TableContainer sx={{ height: "100%" }}>
                 <Table>
                   <TableBody>
@@ -151,14 +147,15 @@ const FileDropzone: React.FC = () => {
                 </Table>
               </TableContainer>
             </Box>
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ maxHeight: "70px" }}
-              onClick={() => alert("Files Sent!")}
-            >
-              Send Files
-            </Button>
+            <Box sx={{ maxHeight: "70px", flex: 2 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => alert("Files Sent!")}
+              >
+                Send Files
+              </Button>
+            </Box>
           </Box>
         ) : (
           <Typography>
