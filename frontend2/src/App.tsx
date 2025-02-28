@@ -11,11 +11,13 @@ function App() {
     localStorage.getItem("isAuthenticated") === "true"
   );
 
+  // login
   const handleLogin = () => {
     localStorage.setItem("isAuthenticated", "true");
     setIsAuthenticated(true);
   };
 
+  // logout
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
     setIsAuthenticated(false);

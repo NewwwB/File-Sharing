@@ -18,6 +18,7 @@ const Login: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
 
+  //login function
   const handleLogin = () => {
     if (email === "admin@example.com" && password === "password") {
       onLogin(); // Triggers authentication
@@ -26,6 +27,7 @@ const Login: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
     }
   };
 
+  //guest login to login without password
   const handleGuestLogin = () => {
     alert("Logging in as Guest");
     onLogin();
@@ -51,7 +53,7 @@ const Login: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
         }}
       >
         <Typography variant="h5" gutterBottom>
-          File Sharing Login
+          LogIn
         </Typography>
 
         <TextField
@@ -83,7 +85,7 @@ const Login: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
         <Button variant="contained" color="primary" fullWidth sx={{ mt: 2 }} onClick={handleLogin}>
           Login
         </Button>
-
+         
         <Button variant="outlined" color="secondary" fullWidth sx={{ mt: 2 }} onClick={handleGuestLogin}>
           Login as Guest
         </Button>
