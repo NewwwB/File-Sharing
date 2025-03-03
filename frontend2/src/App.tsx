@@ -5,11 +5,13 @@ import SideBar from "./layouts/SideBar";
 import NavBar from "./layouts/NavBar";
 import ThemeProviderWrapper from "./theme/ThemeProviderWrapper";
 import LogIn from "./components/Main Content/LogIn";
+import SignUp from "./components/Main Content/SignUp"; // Import SignUp Component
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
     localStorage.getItem("isAuthenticated") === "true"
   );
+  const [isSignUp, setIsSignUp] = useState(false); // Track Login/Signup Page
 
   // login
   const handleLogin = () => {
@@ -33,8 +35,10 @@ function App() {
             <Content />
           </Stack>
         </Box>
+      ) : isSignUp ? (
+        <SignUp onSwitch={() => setIsSignUp(false)} /> /* Switch to Login */
       ) : (
-        <LogIn onLogin={handleLogin} />
+        <LogIn onSwitch={() => setIsSignUp(true)} onLogin={handleLogin} /> /* Switch to SignUp */
       )}
     </ThemeProviderWrapper>
   );

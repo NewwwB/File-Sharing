@@ -15,6 +15,7 @@ import React, { useContext } from "react";
 import img from "../assets/react.svg";
 import { ThemeContext } from "../theme/ThemeProviderWrapper";
 
+
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
 function NavBar({ onLogout }: { onLogout: () => void }) {
