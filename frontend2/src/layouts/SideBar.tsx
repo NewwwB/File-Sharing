@@ -1,88 +1,83 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Divider, Box, Typography, Stack } from "@mui/material";
 import UserCard from "../components/Sidebar/UserCard";
-import Connection from "../components/Sidebar/Connection";
 import { PeerConnection } from "../components/Sidebar/PeerConnection";
-
-interface People {
-  id: number;
-  name: string;
-  online: boolean;
-  profilePic: string;
-}
+import { useWebRTC } from "../context/WebRTC";
 
 type StatusIndicatorProps = "connected" | "disconnected" | "loading";
 
 const SideBar = () => {
+  const { previousConnections } = useWebRTC();
+
   const [connectionStatus, setConnectionStatus] =
     useState<StatusIndicatorProps>("loading"); // 'loading', 'connected', 'disconnected'
-  const [people, setPeople] = useState<People[]>([]);
+  // const [people, setPeople] = useState<People[]>([]);
 
   // Populate mock data
-  useEffect(() => {
-    setPeople([
-      {
-        id: 1,
-        name: "John Doe",
-        online: true,
-        profilePic: "https://via.placeholder.com/40",
-      },
-      {
-        id: 2,
-        name: "Jane Smith",
-        online: false,
-        profilePic: "https://via.placeholder.com/40",
-      },
-      {
-        id: 3,
-        name: "Alice Johnson",
-        online: true,
-        profilePic: "https://via.placeholder.com/40",
-      },
-      {
-        id: 4,
-        name: "Robert Brown",
-        online: false,
-        profilePic: "https://via.placeholder.com/40",
-      },
-      {
-        id: 5,
-        name: "Emily Davis",
-        online: true,
-        profilePic: "https://via.placeholder.com/40",
-      },
-      {
-        id: 6,
-        name: "Michael Wilson",
-        online: false,
-        profilePic: "https://via.placeholder.com/40",
-      },
-      {
-        id: 7,
-        name: "Sarah Taylor",
-        online: true,
-        profilePic: "https://via.placeholder.com/40",
-      },
-      {
-        id: 8,
-        name: "David Anderson",
-        online: false,
-        profilePic: "https://via.placeholder.com/40",
-      },
-      {
-        id: 9,
-        name: "Sophia Martinez",
-        online: true,
-        profilePic: "https://via.placeholder.com/40",
-      },
-      {
-        id: 10,
-        name: "James Thomas",
-        online: false,
-        profilePic: "https://via.placeholder.com/40",
-      },
-    ]);
-  }, []);
+  // useEffect(() => {
+  //   setPeople([
+  //     {
+  //       id: 1,
+  //       name: "John Doe",
+  //       online: true,
+  //       profilePic: "https://via.placeholder.com/40",
+  //     },
+  //     {
+  //       id: 2,
+  //       name: "Jane Smith",
+  //       online: false,
+  //       profilePic: "https://via.placeholder.com/40",
+  //     },
+  //     {
+  //       id: 3,
+  //       name: "Alice Johnson",
+  //       online: true,
+  //       profilePic: "https://via.placeholder.com/40",
+  //     },
+  //     {
+  //       id: 4,
+  //       name: "Robert Brown",
+  //       online: false,
+  //       profilePic: "https://via.placeholder.com/40",
+  //     },
+  //     {
+  //       id: 5,
+  //       name: "Emily Davis",
+  //       online: true,
+  //       profilePic: "https://via.placeholder.com/40",
+  //     },
+  //     {
+  //       id: 6,
+  //       name: "Michael Wilson",
+  //       online: false,
+  //       profilePic: "https://via.placeholder.com/40",
+  //     },
+  //     {
+  //       id: 7,
+  //       name: "Sarah Taylor",
+  //       online: true,
+  //       profilePic: "https://via.placeholder.com/40",
+  //     },
+  //     {
+  //       id: 8,
+  //       name: "David Anderson",
+  //       online: false,
+  //       profilePic: "https://via.placeholder.com/40",
+  //     },
+  //     {
+  //       id: 9,
+  //       name: "Sophia Martinez",
+  //       online: true,
+  //       profilePic: "https://via.placeholder.com/40",
+  //     },
+  //     {
+  //       id: 10,
+  //       name: "James Thomas",
+  //       online: false,
+  //       profilePic: "https://via.placeholder.com/40",
+  //     },
+  //   ]);
+  // }, []);
 
   // Simulate a connection check
   useEffect(() => {
@@ -104,6 +99,9 @@ const SideBar = () => {
     }, 2000);
   }
 
+  const { isConnected, setIncomingConnection, incomingConnection } =
+    useWebRTC();
+
   const [connected, setConnected] = useState(false);
   const [peerName, setPeerName] = useState("");
   const [peerProfilePic, setPeerProfilePic] = useState("");
@@ -113,21 +111,25 @@ const SideBar = () => {
     requesterProfilePic?: string;
   } | null>(null);
 
-  const handleConnect = (peerId: string) => {
+  const handleConnect = async (peerId: string) => {
     console.log("Sending connection request to:", peerId);
-    // Here, you would send the connection request to the specified peer.
-    // For demonstration, let's simulate an incoming request on the peer's end:
-    setTimeout(() => {
-      // On the receiving end, you might call setIncomingRequest with the requester's info.
-      setIncomingRequest({
-        requesterId: "user-1234",
-        requesterName: "Alice",
-        requesterProfilePic: "https://via.placeholder.com/150",
-      });
-    }, 500);
+
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        setIncomingRequest({
+          requesterId: "user-1234",
+          requesterName: "Alice",
+          requesterProfilePic: "https://via.placeholder.com/150",
+        });
+        resolve(); // Correct usage of resolve
+      }, 500);
+    });
+
+    console.log("Connection request processed.");
   };
 
   const handleApprove = () => {
+    // who take care of this ???
     console.log("Incoming connection approved.");
     // Accept the incoming request and establish connection
     setConnected(true);
@@ -135,6 +137,11 @@ const SideBar = () => {
     setPeerProfilePic(incomingRequest?.requesterProfilePic || "");
     // Clear the incoming request
     setIncomingRequest(null);
+
+    // new logic
+    const abc = { ...incomingConnection };
+    abc.approve = true;
+    setIncomingConnection(abc);
   };
 
   const handleReject = () => {
@@ -156,7 +163,7 @@ const SideBar = () => {
         onConnect={handleConnect}
         onApprove={handleApprove}
         onReject={handleReject}
-        isConnected={connected}
+        isConnected={isConnected}
         peerName={peerName}
         peerProfilePic={peerProfilePic}
         incomingRequest={incomingRequest || undefined}
@@ -178,13 +185,15 @@ const SideBar = () => {
         p={1}
         gap={2}
       >
-        {people.map((value) => (
-          <UserCard
-            key={value.id}
-            name={value.name}
-            status={value.online ? "online" : "offline"}
-          />
-        ))}
+        {previousConnections &&
+          previousConnections.map((value) => (
+            <UserCard
+              key={value.id}
+              // user={}
+              status={value.online ? "online" : "offline"}
+              user={value}
+            />
+          ))}
       </Box>
     </Box>
   );

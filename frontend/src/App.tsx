@@ -6,8 +6,8 @@ import NewUI from "./components/NewUI";
 function App() {
   return (
     <>
-      {/* <ClientSelector /> */}
-      <NewUI />
+      <ClientSelector />
+      {/* <NewUI /> */}
     </>
   );
 }

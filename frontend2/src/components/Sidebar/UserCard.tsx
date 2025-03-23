@@ -7,13 +7,21 @@ import {
   Button,
   Badge,
 } from "@mui/material";
+import { useWebRTC } from "../../context/WebRTC";
+import { User } from "../../types/webrtcMessages";
 
 interface UserCardProps {
-  name: string;
+  user: User;
   status: "online" | "offline";
 }
 
-const UserCard: React.FC<UserCardProps> = ({ name, status }) => {
+const UserCard: React.FC<UserCardProps> = ({ user, status }) => {
+  const handleClick = (user: User) => {
+    const { handleConnect } = useWebRTC();
+
+    handleConnect(user);
+  };
+
   return (
     <>
       <Card
@@ -46,14 +54,19 @@ const UserCard: React.FC<UserCardProps> = ({ name, status }) => {
         </Badge>
         <CardContent sx={{ flex: 1, padding: "0 10px" }}>
           <Typography variant="subtitle1" fontWeight="bold">
-            {name.split(" ")[0]}
+            {user.name.split(" ")[0]}
           </Typography>
-          <Typography variant="subtitle1">{name.split(" ")[1]}</Typography>
+          <Typography variant="subtitle1">{user.name.split(" ")[1]}</Typography>
           <Typography variant="caption" color="text.secondary">
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </Typography>
         </CardContent>
-        <Button variant="contained" size="small" sx={{ textTransform: "none" }}>
+        <Button
+          variant="contained"
+          onClick={() => handleClick(user)}
+          size="small"
+          sx={{ textTransform: "none" }}
+        >
           Connect
         </Button>
       </Card>

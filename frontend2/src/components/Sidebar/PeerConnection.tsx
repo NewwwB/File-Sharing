@@ -7,10 +7,12 @@ import {
   Paper,
   Avatar,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import { useWebRTC } from "../../context/WebRTC";
 
 interface IncomingRequest {
   requesterId: string;
@@ -20,16 +22,15 @@ interface IncomingRequest {
 
 interface PeerConnectionProps {
   userId: string;
-  onConnect: (peerId: string) => void; // callback for sending a connection request
-  onApprove?: () => void; // callback when user approves incoming request
-  onReject?: () => void; // callback when user rejects incoming request
-  isConnected: boolean; // whether connection is established
-  peerName?: string; // connected peer's name
-  peerProfilePic?: string; // connected peer's profile picture URL
-  incomingRequest?: IncomingRequest; // optional incoming request info
+  onConnect: (peerId: string) => Promise<void>; // Updated to return a promise for async handling
+  onApprove?: () => void;
+  onReject?: () => void;
+  isConnected: boolean;
+  peerName?: string;
+  peerProfilePic?: string;
+  incomingRequest?: IncomingRequest;
 }
 
-// Example styled status indicator
 const StatusIndicator = styled("div")<{ connected: boolean }>(
   ({ connected, theme }) => ({
     display: "inline-block",
@@ -51,20 +52,26 @@ export const PeerConnection: React.FC<PeerConnectionProps> = ({
 }) => {
   const [peerId, setPeerId] = useState("");
   const [expanded, setExpanded] = useState(false);
+  const [loading, setLoading] = useState(false); // New state for loading indicator
 
-  const handleConnect = () => {
+  const handleConnect = async () => {
     if (peerId.trim()) {
-      onConnect(peerId.trim());
+      setLoading(true); // Start loading
+      try {
+        await onConnect(peerId.trim()); // Await the connection process
+      } catch (error) {
+        console.error("Connection failed", error);
+      }
+      setLoading(false); // Stop loading
     }
   };
 
-  const toggleExpanded = () => {
-    setExpanded(!expanded);
-  };
+  const { incomingConnection } = useWebRTC();
+
+  // this is new branch
 
   return (
     <Paper elevation={1} sx={{ p: 2, maxWidth: 400, marginBottom: "16px" }}>
-      {/* Header: Connection Status */}
       <Box
         sx={{
           display: "flex",
@@ -76,26 +83,23 @@ export const PeerConnection: React.FC<PeerConnectionProps> = ({
           {isConnected ? "Connected" : "Disconnected"}
           <StatusIndicator connected={isConnected}>●</StatusIndicator>
         </Typography>
-
-        {/* Toggle for connected state */}
         {isConnected && (
-          <IconButton onClick={toggleExpanded}>
+          <IconButton onClick={() => setExpanded(!expanded)}>
             {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </IconButton>
         )}
       </Box>
 
-      {/* Incoming Request UI */}
-      {incomingRequest && (
+      {incomingConnection && (
         <Box sx={{ mt: 2, mb: 2, display: "flex", alignItems: "center" }}>
           <Avatar
-            src={incomingRequest.requesterProfilePic || ""}
-            alt={incomingRequest.requesterName || "Requester"}
+            src={incomingConnection.client.profilePic || ""}
+            alt={incomingConnection.client.name || "Requester"}
             sx={{ width: 48, height: 48, mr: 2 }}
           />
           <Box sx={{ flex: 1 }}>
             <Typography variant="body1">
-              {incomingRequest.requesterName || incomingRequest.requesterId}{" "}
+              {incomingConnection.client.name || incomingConnection.client.id}{" "}
               wants to connect.
             </Typography>
             <Box sx={{ mt: 1 }}>
@@ -115,36 +119,10 @@ export const PeerConnection: React.FC<PeerConnectionProps> = ({
         </Box>
       )}
 
-      {/* Collapsed view (only when connected and not expanded, and no incoming request) */}
-      {isConnected && !expanded && !incomingRequest && (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            mt: 2,
-            mb: 2,
-          }}
-        >
-          <Avatar
-            src={peerProfilePic || ""}
-            alt={peerName || "Peer"}
-            sx={{ width: 40, height: 40, mr: 2 }}
-          />
-          <Typography variant="body1">{peerName || "Unknown Peer"}</Typography>
-        </Box>
-      )}
-
-      {/* Expanded view OR when not connected */}
       {(!isConnected || expanded) && !incomingRequest && (
         <Box sx={{ mt: 2 }}>
           {isConnected && (
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                mb: 2,
-              }}
-            >
+            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
               <Avatar
                 src={peerProfilePic || ""}
                 alt={peerName || "Peer"}
@@ -176,9 +154,10 @@ export const PeerConnection: React.FC<PeerConnectionProps> = ({
           <Button
             variant="contained"
             onClick={handleConnect}
-            disabled={!peerId.trim()}
+            disabled={loading || !peerId.trim()}
+            startIcon={loading ? <CircularProgress size={20} /> : null} // Loading indicator
           >
-            Connect
+            {loading ? "Connecting..." : "Connect"}
           </Button>
         </Box>
       )}
