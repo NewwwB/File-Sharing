@@ -181,13 +181,13 @@ const SideBar = () => {
         p={1}
         gap={2}
       >
-        {people.map((value) => (
+        {/* {people.map((value) => (
           <UserCard
             key={value.id}
             name={value.name}
             status={value.online ? "online" : "offline"}
           />
-        ))}
+        ))} */}
         {nearBy?.map((value) => (
           <UserCard name={value.name} status={"online"} key={value.id} />
         ))}

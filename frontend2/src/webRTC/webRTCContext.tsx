@@ -32,6 +32,7 @@ export const WebRTCProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     //getting id stored locally from previous interaction
+    console.log("working");
     const storedId = localStorage.getItem("userId");
 
     //new instance of websocket
@@ -43,6 +44,13 @@ export const WebRTCProvider: React.FC<{ children: React.ReactNode }> = ({
 
     ws.current.onopen = () => {
       console.log("connected");
+    };
+    ws.current.onerror = (err) => {
+      console.error("WebSocket error:", err);
+    };
+
+    ws.current.onclose = (e) => {
+      console.warn("WebSocket closed:", e.code, e.reason);
     };
 
     // event handlers of web socket
