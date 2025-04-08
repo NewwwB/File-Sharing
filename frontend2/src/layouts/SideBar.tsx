@@ -3,6 +3,7 @@ import { Divider, Box, Typography, Stack } from "@mui/material";
 import UserCard from "../components/Sidebar/UserCard";
 import Connection from "../components/Sidebar/Connection";
 import { PeerConnection } from "../components/Sidebar/PeerConnection";
+import { useWebRTC } from "../webRTC/webRTCContext";
 
 interface People {
   id: number;
@@ -17,6 +18,8 @@ const SideBar = () => {
   const [connectionStatus, setConnectionStatus] =
     useState<StatusIndicatorProps>("loading"); // 'loading', 'connected', 'disconnected'
   const [people, setPeople] = useState<People[]>([]);
+
+  const { nearBy } = useWebRTC();
 
   // Populate mock data
   useEffect(() => {
@@ -184,6 +187,9 @@ const SideBar = () => {
             name={value.name}
             status={value.online ? "online" : "offline"}
           />
+        ))}
+        {nearBy?.map((value) => (
+          <UserCard name={value.name} status={"online"} key={value.id} />
         ))}
       </Box>
     </Box>
