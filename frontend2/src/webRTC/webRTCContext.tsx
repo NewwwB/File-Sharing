@@ -18,6 +18,7 @@ type WebRTCContextType = {
   peer: RTCPeerConnection | null;
   createPeer: () => RTCPeerConnection;
   closePeer: () => void;
+  user: User | null;
 };
 
 const WebRTCContext = createContext<WebRTCContextType | undefined>(undefined);
@@ -29,10 +30,10 @@ export const WebRTCProvider: React.FC<{ children: React.ReactNode }> = ({
   const peerRef = useRef<RTCPeerConnection | null>(null);
   const ws = useRef<WebSocket | null>(null);
   const [nearBy, setNearBy] = useState<User[] | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     //getting id stored locally from previous interaction
-    console.log("working");
     const storedId = localStorage.getItem("userId");
 
     //new instance of websocket
@@ -63,7 +64,6 @@ export const WebRTCProvider: React.FC<{ children: React.ReactNode }> = ({
       switch (message.type) {
         case "availableClient":
           if (isClientUpdateMessage(message)) {
-            // setPreviousConnections(message.data.clients);
             setNearBy(message.data.clients);
           }
           break;
@@ -73,7 +73,7 @@ export const WebRTCProvider: React.FC<{ children: React.ReactNode }> = ({
             localStorage.setItem("userName", message.data.name);
             localStorage.setItem("userAvatar", message.data.profilePic);
 
-            // setUser(message.data);
+            setUser(message.data);
           }
           break;
         case "offer":
@@ -128,7 +128,9 @@ export const WebRTCProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   return (
-    <WebRTCContext.Provider value={{ peer, createPeer, closePeer, nearBy }}>
+    <WebRTCContext.Provider
+      value={{ peer, createPeer, closePeer, nearBy, user }}
+    >
       {children}
     </WebRTCContext.Provider>
   );
