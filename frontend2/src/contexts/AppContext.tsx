@@ -1,26 +1,46 @@
 // src/contexts/AppContext.tsx
-import React, { createContext, useContext, useState } from "react";
-import { User } from "../types/webRTCMessages";
+import React, { createContext, useContext, useEffect } from "react";
+import { webSocketService } from "../services/WebSocketService";
+import { useStateContext } from "./StateContext";
+import { createWebSocketHandlers } from "../handlers/webSocketHandlers";
+import { Action, GlobalState } from "../types/stateContextTypes";
 
-interface AppContextType {
-  clients: User[];
-  setClients: React.Dispatch<React.SetStateAction<User[]>>;
-}
+const AppContext = createContext(null);
 
-const AppContext = createContext<AppContextType | undefined>(undefined);
-
-export const AppProvider = ({ children }: { children: React.ReactNode }) => {
-  const [clients, setClients] = useState<User[]>([]);
-
-  return (
-    <AppContext.Provider value={{ clients, setClients }}>
-      {children}
-    </AppContext.Provider>
-  );
-};
-
-export const useAppContext = () => {
+const useAppContext = () => {
   const ctx = useContext(AppContext);
   if (!ctx) throw new Error("useAppContext must be used within AppProvider");
   return ctx;
+};
+
+const AppProvider = ({ children }: { children: React.ReactNode }) => {
+  const { dispatch, state } = useStateContext();
+
+  useEffect(() => {
+    setupWebSocket(dispatch, state);
+    return () => {
+      webSocketService.disconnect();
+    };
+  }, []);
+
+  return <AppContext.Provider value={null}>{children}</AppContext.Provider>;
+};
+
+export { AppProvider, useAppContext };
+
+const setupWebSocket = (
+  dispatch: React.Dispatch<Action>,
+  state: GlobalState
+) => {
+  const storedId = localStorage.getItem("userId");
+  webSocketService.connect(
+    `${window.location.origin.replace(/^http/, "ws")}/ws?${
+      storedId ? "id=" + storedId : ""
+    }`
+  );
+
+  createWebSocketHandlers(dispatch, state).forEach((handler) =>
+    webSocketService.registerHandler(handler.type, handler.func)
+  );
+  webSocketService.resgisterMessageListener();
 };

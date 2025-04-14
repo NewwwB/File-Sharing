@@ -6,14 +6,14 @@ import { Box, Stack } from "@mui/material";
 import Content from "./layouts/Content";
 import SideBar from "./layouts/SideBar";
 import NavBar from "./layouts/NavBar";
-import ThemeProviderWrapper from "../src/theme/ThemeProviderWrapper"; // Import theme provider
-import { WebRTCProvider } from "./webRTC/webRTCContext";
+import ThemeProviderWrapper from "../src/theme/ThemeProviderWrapper";
 import { AppProvider } from "./contexts/AppContext";
+import { StateProvider } from "./contexts/StateContext";
 
 function App() {
   return (
-    <AppProvider>
-      <WebRTCProvider>
+    <StateProvider>
+      <AppProvider>
         <ThemeProviderWrapper>
           <Box sx={{ height: "100vh", overflow: "hidden" }}>
             <NavBar />
@@ -28,8 +28,8 @@ function App() {
             </Stack>
           </Box>
         </ThemeProviderWrapper>
-      </WebRTCProvider>
-    </AppProvider>
+      </AppProvider>
+    </StateProvider>
   );
 }
 

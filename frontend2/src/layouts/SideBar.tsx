@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Divider, Box, Typography, Stack } from "@mui/material";
 import UserCard from "../components/Sidebar/UserCard";
-import Connection from "../components/Sidebar/Connection";
 import { PeerConnection } from "../components/Sidebar/PeerConnection";
-import { useWebRTC } from "../webRTC/webRTCContext";
+import { useStateContext } from "../contexts/StateContext";
 
 interface People {
   id: number;
@@ -19,7 +18,7 @@ const SideBar = () => {
     useState<StatusIndicatorProps>("loading"); // 'loading', 'connected', 'disconnected'
   const [people, setPeople] = useState<People[]>([]);
 
-  const { nearBy } = useWebRTC();
+  const { state } = useStateContext();
 
   // Populate mock data
   useEffect(() => {
@@ -188,8 +187,8 @@ const SideBar = () => {
             status={value.online ? "online" : "offline"}
           />
         ))} */}
-        {nearBy?.map((value) => (
-          <UserCard name={value.name} status={"online"} key={value.id} />
+        {state.clients.map((value) => (
+          <UserCard user={value} status="online" key={value.id} />
         ))}
       </Box>
     </Box>

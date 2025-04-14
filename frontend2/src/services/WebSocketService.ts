@@ -1,3 +1,4 @@
+import { Action } from "../types/stateContextTypes";
 import { Message } from "../types/webRTCMessages";
 
 type MessageHandler = (message: Message) => void;
@@ -25,8 +26,17 @@ class WebSocketService {
     this.socket.onerror = (e) => {
       console.error("WS error:", e);
     };
+  }
+
+  resgisterMessageListener() {
+    if (!this.socket) {
+      console.warn("WS not found");
+      return;
+    }
     this.socket.onmessage = (event) => {
       const msg: Message = JSON.parse(event.data);
+
+      console.log("WS message: ", msg);
 
       const handler = this.handlers[msg.type];
 
@@ -57,5 +67,4 @@ class WebSocketService {
     delete this.handlers[type];
   }
 }
-
 export const webSocketService = new WebSocketService();

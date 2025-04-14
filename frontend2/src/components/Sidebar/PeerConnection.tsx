@@ -11,6 +11,9 @@ import {
 import { styled } from "@mui/material/styles";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import { User } from "../../types/webRTCMessages";
+import { useStateContext } from "../../contexts/StateContext";
+import { resolveApproval } from "../../services/ApprovalService";
 
 interface IncomingRequest {
   requesterId: string;
@@ -42,8 +45,6 @@ const StatusIndicator = styled("div")<{ connected: boolean }>(
 export const PeerConnection: React.FC<PeerConnectionProps> = ({
   userId,
   onConnect,
-  onApprove,
-  onReject,
   isConnected,
   peerName,
   peerProfilePic,
@@ -51,6 +52,8 @@ export const PeerConnection: React.FC<PeerConnectionProps> = ({
 }) => {
   const [peerId, setPeerId] = useState("");
   const [expanded, setExpanded] = useState(false);
+
+  const { state, dispatch } = useStateContext();
 
   const handleConnect = () => {
     if (peerId.trim()) {
@@ -74,6 +77,8 @@ export const PeerConnection: React.FC<PeerConnectionProps> = ({
       >
         <Typography variant="h6">
           {isConnected ? "Connected" : "Disconnected"}
+          <br />
+          {state.connectionStatus}
           <StatusIndicator connected={isConnected}>●</StatusIndicator>
         </Typography>
 
@@ -86,28 +91,32 @@ export const PeerConnection: React.FC<PeerConnectionProps> = ({
       </Box>
 
       {/* Incoming Request UI */}
-      {incomingRequest && (
+      {state.approvalRequest && (
         <Box sx={{ mt: 2, mb: 2, display: "flex", alignItems: "center" }}>
           <Avatar
-            src={incomingRequest.requesterProfilePic || ""}
-            alt={incomingRequest.requesterName || "Requester"}
+            src={state.approvalRequest.profilePic || ""}
+            alt={state.approvalRequest.name || "Requester"}
             sx={{ width: 48, height: 48, mr: 2 }}
           />
           <Box sx={{ flex: 1 }}>
             <Typography variant="body1">
-              {incomingRequest.requesterName || incomingRequest.requesterId}{" "}
-              wants to connect.
+              {state.approvalRequest.name || state.approvalRequest.id} wants to
+              connect.
             </Typography>
             <Box sx={{ mt: 1 }}>
               <Button
                 variant="contained"
                 color="primary"
-                onClick={onApprove}
+                onClick={() => resolveApproval(true, dispatch)}
                 sx={{ mr: 1 }}
               >
                 Approve
               </Button>
-              <Button variant="outlined" color="error" onClick={onReject}>
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={() => resolveApproval(false, dispatch)}
+              >
                 Reject
               </Button>
             </Box>

@@ -7,13 +7,47 @@ import {
   Button,
   Badge,
 } from "@mui/material";
+import { OfferMessage, User } from "../../types/webRTCMessages";
+import { webRTCService } from "../../services/WebRTCServices";
+import { webSocketService } from "../../services/WebSocketService";
+import { useStateContext } from "../../contexts/StateContext";
 
 interface UserCardProps {
-  name: string;
+  user: User;
   status: "online" | "offline";
 }
 
-const UserCard: React.FC<UserCardProps> = ({ name, status }) => {
+const UserCard: React.FC<UserCardProps> = ({ user, status }) => {
+  const { state, dispatch } = useStateContext();
+
+  const handleConnect = async () => {
+    dispatch({ type: "SET_REMOTE_USER", payload: user });
+    if (state.user) {
+      webRTCService.cleanup();
+      webRTCService.setupConnection(state.user, user, dispatch);
+      const offer = await webRTCService.createOffer();
+      if (!offer) {
+        console.warn("failed to create offer while connecting");
+        return;
+      }
+      const msg: OfferMessage = {
+        type: "offer",
+        data: {
+          offer,
+          from: state.user,
+          to: user,
+        },
+      };
+      webSocketService.send(msg);
+    } else {
+      if (!offer) {
+        console.warn("offer not created while connecting");
+      } else {
+        console.warn("user state has not been setuped");
+      }
+    }
+  };
+
   return (
     <>
       <Card
@@ -46,14 +80,19 @@ const UserCard: React.FC<UserCardProps> = ({ name, status }) => {
         </Badge>
         <CardContent sx={{ flex: 1, padding: "0 10px" }}>
           <Typography variant="subtitle1" fontWeight="bold">
-            {name.split(" ")[0]}
+            {user.name.split(" ")[0]}
           </Typography>
-          <Typography variant="subtitle1">{name.split(" ")[1]}</Typography>
+          <Typography variant="subtitle1">{user.name.split(" ")[1]}</Typography>
           <Typography variant="caption" color="text.secondary">
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </Typography>
         </CardContent>
-        <Button variant="contained" size="small" sx={{ textTransform: "none" }}>
+        <Button
+          variant="contained"
+          onClick={handleConnect}
+          size="small"
+          sx={{ textTransform: "none" }}
+        >
           Connect
         </Button>
       </Card>
