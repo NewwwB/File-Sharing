@@ -25,6 +25,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, status }) => {
     if (state.user) {
       webRTCService.cleanup();
       webRTCService.setupConnection(state.user, user, dispatch);
+      webRTCService.createDummyDataChannel();
       const offer = await webRTCService.createOffer();
       if (!offer) {
         console.warn("failed to create offer while connecting");
@@ -40,11 +41,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, status }) => {
       };
       webSocketService.send(msg);
     } else {
-      if (!offer) {
-        console.warn("offer not created while connecting");
-      } else {
-        console.warn("user state has not been setuped");
-      }
+      console.warn("user state has not been setuped");
     }
   };
 

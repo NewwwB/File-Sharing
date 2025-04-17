@@ -66,6 +66,15 @@ class WebRTCServices {
     }
   }
 
+  createDummyDataChannel() {
+    if (!this.pc) {
+      console.warn("PC not available while creating dummy data channel");
+      return;
+    }
+
+    this.pc.createDataChannel("dummy");
+  }
+
   async createOffer(): Promise<RTCSessionDescriptionInit | null> {
     if (!this.pc) {
       console.warn("PC not available while creating offer");
