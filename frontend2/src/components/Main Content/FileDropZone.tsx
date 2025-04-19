@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -12,169 +12,202 @@ import {
   TableRow,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { webRTCService } from "../../services/WebRTCServices";
+import { useStateContext } from "../../contexts/StateContext";
 
 const FileDropzone: React.FC = () => {
-  const theme = useTheme(); // Get the theme
-  const isDarkMode = theme.palette.mode === "dark"; // Check if dark mode is enabled
-
+  const theme = useTheme();
+  const { dispatch } = useStateContext();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
 
+  // Cleanup object URLs on unmount
+  useEffect(() => {
+    return () => {
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [previewUrls]);
+
   const handleFiles = (files: FileList | File[]) => {
     const newFiles = Array.from(files).filter(
-      (file) => !selectedFiles.some((f) => f.name === file.name) // Prevent duplicates
+      (file) => !selectedFiles.some((f) => f.name === file.name)
     );
 
+    const newPreviewUrls = newFiles.map((file) => URL.createObjectURL(file));
+
     setSelectedFiles((prev) => [...prev, ...newFiles]);
-    setPreviewUrls((prev) => [
-      ...prev,
-      ...newFiles.map((file) => URL.createObjectURL(file)),
-    ]);
+    setPreviewUrls((prev) => [...prev, ...newPreviewUrls]);
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) handleFiles(event.target.files);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) handleFiles(e.target.files);
   };
 
-  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
     setIsDragging(true);
   };
 
   const handleDragLeave = () => setIsDragging(false);
 
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
     setIsDragging(false);
-    if (event.dataTransfer.files.length) handleFiles(event.dataTransfer.files);
+    if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
   };
 
   const handleRemoveFile = (index: number) => {
+    URL.revokeObjectURL(previewUrls[index]);
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
     setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleSendFiles = () => {
+    selectedFiles.forEach((file) => {
+      const transferId = crypto.randomUUID();
+      const channel = webRTCService.createFileDataChannel(transferId, file);
+
+      if (!channel) {
+        dispatch({
+          type: "ADD_FILE_TRANSFER",
+          payload: {
+            id: transferId,
+            name: file.name,
+            size: file.size,
+            progress: 0,
+            status: "error",
+            direction: "outgoing",
+          },
+        });
+        return;
+      }
+
+      dispatch({
+        type: "ADD_FILE_TRANSFER",
+        payload: {
+          id: transferId,
+          name: file.name,
+          size: file.size,
+          progress: 0,
+          status: "active",
+          direction: "outgoing",
+        },
+      });
+    });
+
+    setSelectedFiles([]);
+    setPreviewUrls([]);
+  };
+
   return (
     <Box
-      m={0}
       sx={{
         width: "100%",
-        textAlign: "center",
+        height: "100%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        flex: "1",
-        overflow: "hidden",
+        p: 2,
       }}
     >
       <Box
-        p={2}
-        borderRadius={2}
-        boxShadow={3}
-        display="flex"
-        gap={1}
-        flexDirection="column"
-        justifyContent="center"
-        alignItems="center"
-        border="2px dashed gray"
-        minHeight="150px"
-        height="100%"
-        width="100%"
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         sx={{
-          borderColor: isDragging ? "blue" : "gray",
+          width: "100%",
+          border: 2,
+          borderRadius: 2,
+          borderColor: isDragging ? theme.palette.primary.main : "divider",
           backgroundColor: isDragging
-            ? isDarkMode
-              ? "#333"
-              : "#f0f8ff"
-            : isDarkMode
-            ? "#222"
-            : "white",
-          color: isDarkMode ? "#fff" : "#000",
-          transition: "0.2s ease-in-out",
+            ? theme.palette.action.hover
+            : theme.palette.background.paper,
+          transition: "all 0.2s ease",
+          "&:hover": {
+            borderColor: theme.palette.primary.main,
+          },
         }}
       >
         {selectedFiles.length > 0 ? (
-          <Box
-            display="flex"
-            flexDirection="row"
-            justifyContent="space-around"
-            alignItems="center"
-            width="100%"
-            height="100%"
-          >
-            <Box width="100%" height="100%" sx={{ overflowY: "auto", flex: 6 }}>
-              <TableContainer sx={{ height: "100%" }}>
-                <Table>
-                  <TableBody>
-                    {selectedFiles.map((file, index) => (
-                      <TableRow key={index}>
-                        <TableCell sx={{ py: 0.5 }}>
-                          {file.type.startsWith("image/") ? (
-                            <img
-                              src={previewUrls[index]}
-                              alt="Preview"
-                              style={{
-                                width: "60px",
-                                height: "60px",
-                                borderRadius: "8px",
-                                objectFit: "cover",
-                              }}
-                            />
-                          ) : (
-                            <Typography variant="body2">{file.name}</Typography>
-                          )}
-                        </TableCell>
-                        <TableCell sx={{ py: 0.5 }}>
-                          <Typography variant="body2" color="gray">
-                            {(file.size / 1024).toFixed(2)} KB
-                          </Typography>
-                        </TableCell>
-                        <TableCell sx={{ py: 0.5 }}>
-                          <IconButton
-                            color="error"
-                            onClick={() => handleRemoveFile(index)}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Box>
-            <Box sx={{ maxHeight: "70px", flex: 2 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => alert("Files Sent!")}
-              >
-                Send Files
-              </Button>
-            </Box>
+          <Box display="flex" flexDirection="column" gap={2} p={2}>
+            <TableContainer sx={{ maxHeight: 200 }}>
+              <Table size="small">
+                <TableBody>
+                  {selectedFiles.map((file, index) => (
+                    <TableRow key={index}>
+                      <TableCell sx={{ py: 0.5 }}>
+                        {file.type.startsWith("image/") ? (
+                          <img
+                            src={previewUrls[index]}
+                            alt="Preview"
+                            style={{
+                              width: 60,
+                              height: 60,
+                              borderRadius: 1,
+                              objectFit: "cover",
+                            }}
+                          />
+                        ) : (
+                          <Typography variant="body2">{file.name}</Typography>
+                        )}
+                      </TableCell>
+                      <TableCell sx={{ py: 0.5 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          {(file.size / 1024).toFixed(1)} KB
+                        </Typography>
+                      </TableCell>
+                      <TableCell sx={{ py: 0.5 }}>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleRemoveFile(index)}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <Button
+              fullWidth
+              variant="contained"
+              color="primary"
+              onClick={handleSendFiles}
+            >
+              Send {selectedFiles.length} File
+              {selectedFiles.length > 1 ? "s" : ""}
+            </Button>
           </Box>
         ) : (
-          <Typography>
-            Drag & Drop files here or{" "}
-            <label
-              htmlFor="fileInput"
-              style={{ color: "blue", cursor: "pointer" }}
-            >
-              click to upload
-            </label>
-          </Typography>
+          <Box
+            component="label"
+            htmlFor="fileInput"
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              p: 4,
+              cursor: "pointer",
+            }}
+          >
+            <Typography variant="h6" gutterBottom>
+              Drag & Drop Files
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              or click to browse
+            </Typography>
+            <input
+              type="file"
+              multiple
+              hidden
+              id="fileInput"
+              onChange={handleFileChange}
+            />
+          </Box>
         )}
-        <input
-          type="file"
-          id="fileInput"
-          multiple
-          style={{ display: "none" }}
-          onChange={handleFileChange}
-        />
       </Box>
     </Box>
   );

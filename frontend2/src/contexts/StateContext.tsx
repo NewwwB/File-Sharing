@@ -7,6 +7,7 @@ const initialState: GlobalState = {
   remoteUser: null,
   approvalRequest: null,
   connectionStatus: "disconnected",
+  fileTransfers: [],
 };
 
 function stateReducer(state: GlobalState, action: Action): GlobalState {
@@ -27,7 +28,29 @@ function stateReducer(state: GlobalState, action: Action): GlobalState {
       return { ...state, approvalRequest: action.payload };
     case "UPDATE_CONNECTION_STATUS":
       return { ...state, connectionStatus: action.payload };
+    case "ADD_FILE_TRANSFER":
+      return {
+        ...state,
+        fileTransfers: [...state.fileTransfers, action.payload],
+      };
 
+    case "UPDATE_FILE_TRANSFER":
+      return {
+        ...state,
+        fileTransfers: state.fileTransfers.map((transfer) =>
+          transfer.id === action.payload.id
+            ? { ...transfer, progress: action.payload.progress }
+            : transfer
+        ),
+      };
+
+    case "REMOVE_FILE_TRANSFER":
+      return {
+        ...state,
+        fileTransfers: state.fileTransfers.filter(
+          (transfer) => transfer.id !== action.payload
+        ),
+      };
     default:
       return state;
   }
