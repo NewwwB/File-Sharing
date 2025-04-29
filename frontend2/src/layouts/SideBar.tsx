@@ -168,7 +168,7 @@ const SideBar = () => {
 
       {/* Previous Connection Heading */}
       <Stack spacing={2} m={2} direction="row">
-        <Typography sx={{ fontWeight: 500 }}>Previous Connection</Typography>
+        <Typography sx={{ fontWeight: 500 }}>Nearby Connection</Typography>
       </Stack>
 
       {/* Scrollable Content */}

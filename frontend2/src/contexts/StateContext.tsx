@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer } from "react";
+import { createContext, useContext, useEffect, useReducer } from "react";
 import { GlobalState, Action } from "../types/stateContextTypes";
 
 const initialState: GlobalState = {
@@ -39,7 +39,11 @@ function stateReducer(state: GlobalState, action: Action): GlobalState {
         ...state,
         fileTransfers: state.fileTransfers.map((transfer) =>
           transfer.id === action.payload.id
-            ? { ...transfer, progress: action.payload.progress }
+            ? {
+                ...transfer,
+                progress: action.payload.progress,
+                status: action.payload.status,
+              }
             : transfer
         ),
       };
@@ -63,6 +67,10 @@ const StateContext = createContext<{
 
 export const StateProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(stateReducer, initialState);
+
+  useEffect(() => {
+    state.fileTransfers.forEach((e) => console.log(e.name, ": ", e.status));
+  }, [state.fileTransfers]);
 
   return (
     <StateContext.Provider value={{ state, dispatch }}>

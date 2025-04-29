@@ -94,14 +94,19 @@ class WebRTCServices {
         channelInfo.channel.send(e.target.result);
         channelInfo.offset += e.target.result.byteLength;
         const progress = Math.trunc((channelInfo.offset / file.size) * 100);
-
-        this.dispatch?.({
-          type: "UPDATE_FILE_TRANSFER",
-          payload: { id: transferId, progress, status: "uploading" },
-        });
-
         if (channelInfo.offset < file.size) {
+          console.log("still uploading");
+          this.dispatch?.({
+            type: "UPDATE_FILE_TRANSFER",
+            payload: { id: transferId, progress, status: "uploading" },
+          });
           this.sendFileChunk(transferId);
+        } else {
+          console.log("completed bro");
+          this.dispatch?.({
+            type: "UPDATE_FILE_TRANSFER",
+            payload: { id: transferId, progress, status: "completed" },
+          });
         }
       }
     };
@@ -196,7 +201,7 @@ class WebRTCServices {
       },
     });
 
-    setTimeout(() => this.cleanupDataChannel(transferId), 2000);
+    // setTimeout(() => this.cleanupDataChannel(transferId), 2000);
   }
 
   private cleanupDataChannel(transferId: string) {

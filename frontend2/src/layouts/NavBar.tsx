@@ -10,10 +10,11 @@ import {
   Menu,
   Switch,
 } from "@mui/material";
-import { Menu as MenuIcon } from "@mui/icons-material";
 import React, { useContext } from "react";
-import img from "../assets/react.svg";
-import { ThemeContext } from "../theme/ThemeProviderWrapper"; // Import your ThemeContext
+import { ThemeContext } from "../theme/ThemeProviderWrapper";
+import { useStateContext } from "../contexts/StateContext";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
 
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
@@ -22,7 +23,8 @@ function NavBar() {
     null
   );
 
-  const { darkMode, toggleDarkMode } = useContext(ThemeContext); // Get dark mode state & function
+  const { darkMode, toggleDarkMode } = useContext(ThemeContext);
+  const { state } = useStateContext();
 
   function handleOpenUserMenu(
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -35,56 +37,53 @@ function NavBar() {
   }
 
   return (
-    <>
-      <Box sx={{ flexGrow: 1, height: "64px" }}>
-        <AppBar position="sticky">
-          <Toolbar>
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              sx={{ mr: 2 }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              File Share
-            </Typography>
-            
-            {/* Dark Mode Toggle Switch */}
-            <Switch
-              color="warning"
-              checked={darkMode}
-              onChange={toggleDarkMode}
-              sx={{ marginRight: "10px" }}
-            />
-            <Typography mr={2}>John</Typography>
-            <Box sx={{ flexGrow: 0 }}>
+    <Box sx={{ flexGrow: 1, height: "64px" }}>
+      <AppBar position="sticky">
+        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+          {/* App name or logo */}
+          <Typography variant="h6" component="div">
+            File Share
+          </Typography>
+
+          {/* Right-side controls */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 4 }}>
+            {/* Dark Mode Toggle Group */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <LightModeIcon fontSize="small" />
+              <Switch
+                color="warning"
+                checked={darkMode}
+                onChange={toggleDarkMode}
+              />
+              <DarkModeIcon fontSize="small" />
+            </Box>
+
+            {/* User Info Group */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              {state.user?.name && (
+                <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                  {state.user.name}
+                </Typography>
+              )}
               <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar alt="Remy Sharp" src={img} />
+                  <Avatar
+                    alt={state.user?.name}
+                    src={state.user?.profilePic}
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      objectFit: "cover",
+                      backgroundColor: "#ccc",
+                    }}
+                  />
                 </IconButton>
               </Tooltip>
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorElUser}
-                open={Boolean(anchorElUser)}
-                onClose={handleCloseUserMenu}
-              >
-                {settings.map((setting) => (
-                  <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                    <Typography sx={{ textAlign: "center" }}>
-                      {setting}
-                    </Typography>
-                  </MenuItem>
-                ))}
-              </Menu>
             </Box>
-          </Toolbar>
-        </AppBar>
-      </Box>
-    </>
+          </Box>
+        </Toolbar>
+      </AppBar>
+    </Box>
   );
 }
 

@@ -28,7 +28,8 @@ wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
   }
 
   // Generate an avatar using DiceBear
-  const avatar = createAvatar(adventurer, { seed: id }).toDataUri();
+  const uniqueSeed = `${id}-${Date.now()}-${Math.random()}`;
+  const avatar = createAvatar(adventurer, { seed: uniqueSeed }).toDataUri();
 
   if (!id || !name) {
     id = nanoid();

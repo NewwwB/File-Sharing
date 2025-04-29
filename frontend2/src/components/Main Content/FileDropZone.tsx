@@ -80,6 +80,7 @@ const FileDropzone: React.FC = () => {
             direction: "outgoing",
           },
         });
+        console.error("channel not found while sending");
         return;
       }
 
@@ -90,7 +91,7 @@ const FileDropzone: React.FC = () => {
           name: file.name,
           size: file.size,
           progress: 0,
-          status: "active",
+          status: "uploading",
           direction: "outgoing",
         },
       });

@@ -40,7 +40,8 @@ const FileTransferGrid: React.FC = () => {
                 <TableRow key={transfer.id}>
                   <TableCell>{transfer.name}</TableCell>
                   <TableCell>
-                    {transfer.status !== "completed" ? (
+                    {(transfer.status === "downloading" ||
+                      transfer.status === "uploading") && (
                       <>
                         <LinearProgress
                           variant="determinate"
@@ -48,10 +49,17 @@ const FileTransferGrid: React.FC = () => {
                         />
                         {transfer.progress}%
                       </>
-                    ) : (
+                    )}
+                    {transfer.status === "completed" && (
                       <Box display="flex" alignItems="center">
                         <CheckCircle color="success" sx={{ mr: 1 }} />
                         Completed
+                      </Box>
+                    )}
+                    {transfer.status === "error" && (
+                      <Box display="flex" alignItems="center">
+                        <CheckCircle color="error" sx={{ mr: 1 }} />
+                        Something went wrong!
                       </Box>
                     )}
                   </TableCell>

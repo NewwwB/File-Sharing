@@ -11,7 +11,6 @@ import {
 import { styled } from "@mui/material/styles";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import { User } from "../../types/webRTCMessages";
 import { useStateContext } from "../../contexts/StateContext";
 import { resolveApproval } from "../../services/ApprovalService";
 
@@ -76,10 +75,11 @@ export const PeerConnection: React.FC<PeerConnectionProps> = ({
         }}
       >
         <Typography variant="h6">
-          {isConnected ? "Connected" : "Disconnected"}
-          <br />
-          {state.connectionStatus}
-          <StatusIndicator connected={isConnected}>●</StatusIndicator>
+          {state.connectionStatus.charAt(0).toUpperCase() +
+            state.connectionStatus.slice(1)}
+          <StatusIndicator connected={state.connectionStatus === "connected"}>
+            ●
+          </StatusIndicator>
         </Typography>
 
         {/* Toggle for connected state */}

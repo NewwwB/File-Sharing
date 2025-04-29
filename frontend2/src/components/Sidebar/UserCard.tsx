@@ -71,7 +71,10 @@ const UserCard: React.FC<UserCardProps> = ({ user, status }) => {
             ></span>
           }
         >
-          <Avatar sx={{ width: 50, height: 50, backgroundColor: "#ccc" }}>
+          <Avatar
+            src={user.profilePic}
+            sx={{ width: 50, height: 50, backgroundColor: "#ccc" }}
+          >
             {" "}
           </Avatar>
         </Badge>

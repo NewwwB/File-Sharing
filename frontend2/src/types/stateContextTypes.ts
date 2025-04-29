@@ -11,8 +11,7 @@ export interface FileTransfer {
     | "paused"
     | "completed"
     | "incoming"
-    | "error"
-    | "active";
+    | "error";
   direction: "incoming" | "outgoing";
 }
 
