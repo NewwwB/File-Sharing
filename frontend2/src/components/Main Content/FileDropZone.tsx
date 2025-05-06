@@ -14,6 +14,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import { webRTCService } from "../../services/WebRTCServices";
 import { useStateContext } from "../../contexts/StateContext";
+import { v4 as uuidv4 } from "uuid";
 
 const FileDropzone: React.FC = () => {
   const theme = useTheme();
@@ -65,7 +66,7 @@ const FileDropzone: React.FC = () => {
 
   const handleSendFiles = () => {
     selectedFiles.forEach((file) => {
-      const transferId = crypto.randomUUID();
+      const transferId = uuidv4();
       const channel = webRTCService.createFileDataChannel(transferId, file);
 
       if (!channel) {
